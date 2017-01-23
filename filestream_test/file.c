@@ -34,23 +34,73 @@ int main(int argc , char **argv)
 int calc_infix(char **Data, int n)
 {
 	int result = 0;
+	int num_stack_pt = 0, op_stack_pt = 0;
 	int i;
+	char *Op = (char*)malloc(sizeof(char) * n);
+	int  *Num = (int*)malloc(sizeof(int)  * n);
+	char temp_op;
 	for(i = 0 ; i < n ; i++)
 	{
 		switch(Data[i][0])
 		{
+			//push operator stack
+			
+			if( op_stack_pt == 0 &&(Data[i][0] == '+' || Data[i][0] == '-' || Data[i][0] == '*' || Data[i][0] == '/' || Data[i][0] == '(' || Data[i][0] == ')'))
+			{
+				Op[op_stack_pt++] = Data[i][0];
+				break;
+			}
 			case '+':
-				break;
 			case '-':
-				break;
-			case '*':
+				if( Op[op_stack_pt - 1] == ')' || Op[op_stack_pt - 1] == '*' || Op[op_stack_pt - 1] == '/' || Op[op_stack_pt - 1] == '(')
+				{
+					
+					//Op[op_stack_pt++] = Data[i][0];
+					//pop op
+					//calcurator Data
+					temp_op = Op[op_stack_pt - 1];
+					Op[op_stack_pt - 1] = Data[i][0];
+				}
+				else 
+				{
+					//push op data
+					Op[op_stack_pt++] = Data[i][0];
+				}
 				break;
 			case '/':
+			case '*':
+				if(Op[op_stack_pt - 1] == ')' || Op[op_stack_pt - 1] == '(' || Op[op_stack_pt - 1] == '+' || Op[op_stack_pt - 1] == '-')
+				{
+					//push op
+					Op[op_stack_pt++] = Data[i][0];
+				}
+				else if( Op[op_stack_pt - 1] == '*' || Op[op_stack_pt - 1] == '/')
+				{
+					//pop op
+					//calcurator data
+					temp_op = Op[op_stack_pt - 1];
+					Op[op_stack_pt - 1] = Data[i][0];
+					
+				}
+				break;
+			case '(':
+				Op[op_stack_pt - 1] = Data[i][0];
+				break;
+			case ')':
+				while( Op[op_stack_pt - 1] != '(')
+				{
+					temp_op = Op[op_stack_pt - 1];
+					//calcurator data
+					op_stack_pt--;
+				}
+				op_stack_pt--;
 				break;
 			default :
+				//push number stack
+				Num[num_stack_pt++] = atoi(Data[i]);
 				break;
-		}
-	}
+		}//switch 
+	}//for
 	
 	return result;
-}
+} //function calc
