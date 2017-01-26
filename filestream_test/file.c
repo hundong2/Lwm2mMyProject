@@ -4,17 +4,40 @@
 #include <fcntl.h>
 #include <unistd.h> //wrtie , close
 #define BUFF_SIZE 1024
-
 void tokken(char *t);
-int calc_infix(char **Data, int n);
+int calc(char *Operation_stack, double *Number_stack, int Op_size, int Num_size);
+int Order(char oper);
+int Op_Arrangement(char *Op, int size);
+int Num_Arrangement(double *Num, int size);
+
 
 void tokken(char *t)
 {
-	int i = 0;
+	int i = 0, number = 0, Op_size = 0, Num_size = 0;
+	char *Op_stack;
+	double *Num_stack;
 	char *data[10];
-	data[i++] = strtok(t , " \n");
-	while( data[i++] = strtok( NULL , " \n"));
-	calc_infix(data, i - 1);
+	data[number++] = strtok(t , " \n");
+	while( data[number++] = strtok( NULL , " \n"));
+	Op_stack = (char*)malloc(sizeof(char)* i);
+	Num_stack = (double*)malloc(sizeof(double) *i);
+	for( i = 0 ; i < number - 1; i++)
+	{
+		switch(data[i][0])
+		{
+			case '*':
+			case '-':
+			case '+':
+			case '/':
+			case '(':
+			case ')':
+				Op_stack[Op_size++] = data[i][0];
+				break;
+			default :
+				Num_stack[Num_size++] = atof(data[i]);
+				break;
+		}
+	}
 	
 }
 int main(int argc , char **argv)
@@ -31,76 +54,110 @@ int main(int argc , char **argv)
 	close(fd);
 	return 0;
 }
-int calc_infix(char **Data, int n)
+int calc(char *Operation_stack, double *Number_stack, int Op_size, int Num_size)
 {
-	int result = 0;
-	int num_stack_pt = 0, op_stack_pt = 0;
-	int i;
-	char *Op = (char*)malloc(sizeof(char) * n);
-	int  *Num = (int*)malloc(sizeof(int)  * n);
-	char temp_op;
-	for(i = 0 ; i < n ; i++)
+	int backet_point = 0;
+	int Op_point = 0, Num_point = 0;
+	while(1)
 	{
-		switch(Data[i][0])
-		{
-			//push operator stack
-			
-			if( op_stack_pt == 0 &&(Data[i][0] == '+' || Data[i][0] == '-' || Data[i][0] == '*' || Data[i][0] == '/' || Data[i][0] == '(' || Data[i][0] == ')'))
+		if( 42 <= Operation_stack[Op_point] && Operation_stack[Op_point] <= 47 )
+		{	
+			if( Operation_stack[Op_point + 1] != ')' && Operation_stack[Op_point + 1] != '(' )
 			{
-				Op[op_stack_pt++] = Data[i][0];
-				break;
+				if( Order(Operation_stack[Op_point]) >= Order(Operation_stack[Op_point + 1]) )
+				{
+					//value of number stack operate
+					switch( Operation_stack[Op_point])
+					{
+						case '+':
+							Number_stack[Num_point] = Number_stack[Num_point] + Number_stack[Num_point + 1];
+							Number_stack[Num_point + 1] = 0;
+							break;
+						case '-':
+							Number_stack[Num_point] = Number_stack[Num_point] - Number_stack[Num_point + 1];
+							Number_stack[Num_point + 1] = 0;
+							break;
+						case '/':
+							Number_stack[Num_point] = Number_stack[Num_point] / Number_stack[Num_point + 1];
+							Number_stack[Num_point + 1] = 0;
+							break;
+						case '*':
+							Number_stack[Num_point] = Number_stack[Num_point] * Number_stack[Num_point + 1];
+							Number_stack[Num_point + 1] = 0;
+							break;
+					}
+					Num_point = 0;
+					Op_point = 0;
+					//value of all stack pointer set zero(0) 
+				}
+				else if( Order(Operation_stack[Op_point]) < Order(Operation_stack[Op_point + 1]) )
+				{
+					//pointer of operation stack move to forward
+					//pointer of number stack move to forward 
+					Num_point++; Op_point++;
+				}
 			}
-			case '+':
-			case '-':
-				if( Op[op_stack_pt - 1] == ')' || Op[op_stack_pt - 1] == '*' || Op[op_stack_pt - 1] == '/' || Op[op_stack_pt - 1] == '(')
+			else
+			{
+				if( Operation_stack[Op_point + 1] == ')')
 				{
-					
-					//Op[op_stack_pt++] = Data[i][0];
-					//pop op
-					//calcurator Data
-					temp_op = Op[op_stack_pt - 1];
-					Op[op_stack_pt - 1] = Data[i][0];
+					//value of number stack operate
+					//if operation stack value is '(' then exchange the value to ' '
+					//and then barket point location value exchange to ' '
+
 				}
-				else 
-				{
-					//push op data
-					Op[op_stack_pt++] = Data[i][0];
-				}
-				break;
-			case '/':
-			case '*':
-				if(Op[op_stack_pt - 1] == ')' || Op[op_stack_pt - 1] == '(' || Op[op_stack_pt - 1] == '+' || Op[op_stack_pt - 1] == '-')
-				{
-					//push op
-					Op[op_stack_pt++] = Data[i][0];
-				}
-				else if( Op[op_stack_pt - 1] == '*' || Op[op_stack_pt - 1] == '/')
-				{
-					//pop op
-					//calcurator data
-					temp_op = Op[op_stack_pt - 1];
-					Op[op_stack_pt - 1] = Data[i][0];
-					
-				}
-				break;
-			case '(':
-				Op[op_stack_pt - 1] = Data[i][0];
-				break;
-			case ')':
-				while( Op[op_stack_pt - 1] != '(')
-				{
-					temp_op = Op[op_stack_pt - 1];
-					//calcurator data
-					op_stack_pt--;
-				}
-				op_stack_pt--;
-				break;
-			default :
-				//push number stack
-				Num[num_stack_pt++] = atoi(Data[i]);
-				break;
-		}//switch 
-	}//for
-	
-	return result;
+			}//if
+		}//if
+		else if( Operation_stack[Op_point] == '(')
+		{
+			//current location stack point throught barcket pointer value
+			// movement to stack pointer
+		}
+	}//while
+	Op_size = Op_Arrangement(Operation_stack, Op_size);
+	Num_size = Num_Arrangement(Number_stack, Num_size);	
 } //function calc
+int Op_Arrangement(char *Op, int size)
+{
+	char *temp = (char*)malloc(sizeof(char)*size);
+	int i, result_size = size;
+	for( i = 0 ; i < size ; i++)
+	{
+		if( Op[i] != ' ')
+		{
+			temp[result_size++] = Op[i];
+		}
+	}
+	Op = temp;
+	return result_size - 1;
+}
+int Num_Arrangement(double *Num , int size)
+{
+	double *temp = (double*)malloc(sizeof(double)*size);
+	int i, result_size = size;
+	for( i = 0 ; i < size ; i++)
+	{
+		if( Num[i] != -1)
+		{
+			temp[result_size++] = Num[i];
+		}
+	}
+	Num = temp;
+	return result_size - 1;
+}
+int Order(char oper)
+{
+	int result_number = 3;
+	switch(oper)
+	{
+		case '-':
+		case '+':
+			result_number = 1;
+			break;
+		case '/':
+		case '*':
+			result_number = 2;
+			break;
+	}
+	return result_number;
+}
