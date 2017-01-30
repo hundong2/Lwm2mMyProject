@@ -1,0 +1,4 @@
+gcc -o calc.c
+ar rc libcalc.a calc.o
+gcc -o server.c
+gcc -o server server.o -L./ -lcalc -lm -pthread

@@ -2,14 +2,18 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <arpa/inet.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 
 #define BUFF_SIZE 1024
+
+
 int main(int argc , char **argv)
 {
-	int clnt_socket;
+	int clnt_socket, fd;
+	char temp[BUFF_SIZE];
 	struct sockaddr_in serv_addr;
 	char buff[BUFF_SIZE + 5];
 
@@ -25,12 +29,18 @@ int main(int argc , char **argv)
 	serv_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
 	if( -1 == connect(clnt_socket, (struct sockaddr*)&serv_addr, sizeof(serv_addr)))
 	{
-		printf("error\n");	
+		printf("error\n");
 		exit(1);
 	}
+	/*if( 0 < ( fd = open(argv[1] , O_RDONLY | O_CREAT)) )
+	{
+		read(fd , temp , BUFF_SIZE);
+		close(fd);
+	}*/
+	//printf("strlent temp = %d \n" , strlen(temp));
 	write(clnt_socket , argv[1] , strlen(argv[1]) + 1);
 	read(clnt_socket , buff, BUFF_SIZE);
-	printf("%s\n" , buff);
+	printf("receive data = %s\n" , buff);
 	close(clnt_socket);
 	return 0;
 }
