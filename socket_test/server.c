@@ -24,7 +24,7 @@ void *NewFunc(void *fd)
 	write(*(int *)fd , buff_snd , strlen(buff_snd) + 1);
 	close(*(int *)fd);
 }
-int main()
+int main(int argc, char **argv)
 {
 	int serv_socket;
 	int clnt_socket;
@@ -46,7 +46,7 @@ int main()
 	memset(&serv_addr, 0, sizeof(serv_addr));
 	serv_addr.sin6_family = AF_INET6;
 	serv_addr.sin6_flowinfo = 0;
-	serv_addr.sin6_port = htons(4000);
+	serv_addr.sin6_port = htons(atoi(argv[1]));
 	serv_addr.sin6_addr = in6addr_any;
 	if( -1 == bind(serv_socket, (struct sockaddr*)&serv_addr, sizeof(serv_addr)))
 	{
